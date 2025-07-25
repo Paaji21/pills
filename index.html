@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Transformation Pills</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .scene-image {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            display: none;
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+        }
+        .stat {
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        #gif-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        #flashing-gif {
+            max-width: 100%;
+            border: 3px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div id="intro-scene">
+            <h1>The Mysterious Package</h1>
+            <p>You're a college student sitting at your desk, going through your usual morning routine. As you check your email, one message catches your eye with the subject line: "Special Gift Just For You".</p>
+            
+            <div id="gif-container">
+                <img id="flashing-gif" src="https://via.placeholder.com/400x300/ff69b4/ffffff?text=Hypnotic+Images" alt="Flashing images">
+            </div>
+            
+            <p>The GIF shows rapidly changing images of beautiful women in suggestive poses, mixed with hypnotic patterns. You can't look away...</p>
+            <button id="watch-gif">Continue Watching</button>
+            <p id="watch-counter">Times watched: 0/5</p>
+        </div>
+
+        <div id="package-scene" class="hidden">
+            <h2>The Package Arrives</h2>
+            <img class="scene-image" id="package-img" src="https://via.placeholder.com/400x200/8a2be2/ffffff?text=Mysterious+Package" alt="Mysterious package">
+            <p>After watching those images, you feel strangely aroused and your thoughts keep drifting to how it might feel to be like those women. A knock at the door interrupts your thoughts.</p>
+            <p>You open it to find a package with your name on it. Inside are 10 pill bottles, each labeled with different effects related to feminization and bimbofication.</p>
+            <button id="open-package">Examine the Pills</button>
+        </div>
+
+        <div id="pill-selection" class="hidden">
+            <h2>Day <span id="day-counter">1</span> - Choose Your Pill</h2>
+            <div class="stats">
+                <div class="stat">
+                    <div>Masculinity</div>
+                    <div id="masculinity">100%</div>
+                </div>
+                <div class="stat">
+                    <div>Femininity</div>
+                    <div id="femininity">0%</div>
+                </div>
+                <div class="stat">
+                    <div>Intelligence</div>
+                    <div id="intelligence">100%</div>
+                </div>
+                <div class="stat">
+                    <div>Bimbo</div>
+                    <div id="bimbo">0%</div>
+                </div>
+            </div>
+
+            <p>Which pill will you take today?</p>
+            <div class="choices" id="pill-choices">
+                <!-- Pill buttons will be added by JavaScript -->
+            </div>
+            
+            <div id="transformation-result" class="hidden">
+                <p id="result-text"></p>
+                <img class="scene-image" id="result-img" src="" alt="Transformation result">
+                <button id="next-day">Continue to Next Day</button>
+            </div>
+        </div>
+
+        <div id="ending-scene" class="hidden">
+            <h2>Transformation Complete</h2>
+            <img class="scene-image" id="ending-img" src="https://via.placeholder.com/400x500/ff69b4/ffffff?text=Complete+Bimbo" alt="Final transformation">
+            <p id="ending-text"></p>
+            <button id="restart-game">Start Over</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            day: 1,
+            maxDays: 10,
+            gifViews: 0,
+            stats: {
+                masculinity: 100,
+                femininity: 0,
+                intelligence: 100,
+                bimbo: 0
+            },
+            pills: [
+                { 
+                    name: "Pink Femininity", 
+                    description: "Enhances feminine features and softens masculine traits",
+                    effects: { masculinity: -15, femininity: +20, intelligence: -5, bimbo: +5 }
+                },
+                { 
+                    name: "Brain Drain", 
+                    description: "Reduces intelligence while increasing bimbo tendencies",
+                    effects: { masculinity: -5, femininity: +10, intelligence: -20, bimbo: +15 }
+                },
+                { 
+                    name: "Bimbo Blossom", 
+                    description: "Accelerates bimbo transformation with noticeable physical changes",
+                    effects: { masculinity: -10, femininity: +15, intelligence: -10, bimbo: +20 }
+                },
+                { 
+                    name: "Hormone Harmony", 
+                    description: "Balances your hormones toward feminine patterns",
+                    effects: { masculinity: -20, femininity: +25, intelligence: 0, bimbo: +5 }
+                },
+                { 
+                    name: "Curves Creator", 
+                    description: "Develops feminine curves and reduces muscle definition",
+                    effects: { masculinity: -15, femininity: +15, intelligence: -5, bimbo: +10 }
+                }
+            ]
+        };
+
+        // DOM elements
+        const introScene = document.getElementById('intro-scene');
+        const packageScene = document.getElementById('package-scene');
+        const pillSelection = document.getElementById('pill-selection');
+        const endingScene = document.getElementById('ending-scene');
+        const watchGifBtn = document.getElementById('watch-gif');
+        const watchCounter = document.getElementById('watch-counter');
+        const openPackageBtn = document.getElementById('open-package');
+        const pillChoices = document.getElementById('pill-choices');
+        const transformationResult = document.getElementById('transformation-result');
+        const resultText = document.getElementById('result-text');
+        const nextDayBtn = document.getElementById('next-day');
+        const dayCounter = document.getElementById('day-counter');
+        const restartBtn = document.getElementById('restart-game');
+        const endingText = document.getElementById('ending-text');
+
+        // Stat displays
+        const masculinityDisplay = document.getElementById('masculinity');
+        const femininityDisplay = document.getElementById('femininity');
+        const intelligenceDisplay = document.getElementById('intelligence');
+        const bimboDisplay = document.getElementById('bimbo');
+
+        // Event listeners
+        watchGifBtn.addEventListener('click', watchGif);
+        openPackageBtn.addEventListener('click', openPackage);
+        nextDayBtn.addEventListener('click', nextDay);
+        restartBtn.addEventListener('click', restartGame);
+
+        // Initialize game
+        function initGame() {
+            introScene.classList.remove('hidden');
+            packageScene.classList.add('hidden');
+            pillSelection.classList.add('hidden');
+            endingScene.classList.add('hidden');
+            transformationResult.classList.add('hidden');
+            
+            gameState.day = 1;
+            gameState.gifViews = 0;
+            gameState.stats = {
+                masculinity: 100,
+                femininity: 0,
+                intelligence: 100,
+                bimbo: 0
+            };
+            
+            updateStatDisplays();
+            watchCounter.textContent = `Times watched: ${gameState.gifViews}/5`;
+        }
+
+        // Watch GIF scene
+        function watchGif() {
+            gameState.gifViews++;
+            watchCounter.textContent = `Times watched: ${gameState.gifViews}/5`;
+            
+            if (gameState.gifViews >= 5) {
+                watchGifBtn.textContent = "You feel different...";
+                watchGifBtn.removeEventListener('click', watchGif);
+                watchGifBtn.addEventListener('click', showPackageScene);
+            }
+        }
+
+        function showPackageScene() {
+            introScene.classList.add('hidden');
+            packageScene.classList.remove('hidden');
+        }
+
+        // Open package scene
+        function openPackage() {
+            packageScene.classList.add('hidden');
+            pillSelection.classList.remove('hidden');
+            setupPillChoices();
+        }
+
+        // Set up pill choices for the day
+        function setupPillChoices() {
+            pillChoices.innerHTML = '';
+            dayCounter.textContent = gameState.day;
+            
+            // Shuffle pills and pick 3
+            const shuffledPills = [...gameState.pills].sort(() => 0.5 - Math.random());
+            const dailyPills = shuffledPills.slice(0, 3);
+            
+            dailyPills.forEach(pill => {
+                const btn = document.createElement('button');
+                btn.textContent = `${pill.name}: ${pill.description}`;
+                btn.addEventListener('click', () => takePill(pill));
+                pillChoices.appendChild(btn);
+            });
+        }
+
+        // Take a pill and show results
+        function takePill(pill) {
+            // Apply effects
+            for (const stat in pill.effects) {
+                gameState.stats[stat] += pill.effects[stat];
+                // Clamp between 0-100
+                gameState.stats[stat] = Math.max(0, Math.min(100, gameState.stats[stat]));
+            }
+            
+            updateStatDisplays();
+            
+            // Show result
+            pillSelection.classList.add('hidden');
+            transformationResult.classList.remove('hidden');
+            
+            // Generate result text based on effects
+            let result = `You take the ${pill.name} pill. `;
+            
+            if (pill.effects.femininity > 0) {
+                result += "You feel a warm sensation as your body becomes more feminine. ";
+            }
+            
+            if (pill.effects.masculinity < 0) {
+                result += "Your masculine features seem to soften and fade. ";
+            }
+            
+            if (pill.effects.intelligence < 0) {
+                result += "Thoughts become simpler, more focused on pleasure and appearance. ";
+            }
+            
+            if (pill.effects.bimbo > 0) {
+                result += "You find yourself caring more about looking sexy and less about serious matters. ";
+            }
+            
+            resultText.textContent = result;
+            
+            // Show appropriate image based on transformation progress
+            const femininity = gameState.stats.femininity;
+            const bimbo = gameState.stats.bimbo;
+            
+            if (bimbo > 70) {
+                resultImg.src = "https://via.placeholder.com/400x500/ff69b4/ffffff?text=Almost+Complete+Bimbo";
+            } else if (femininity > 50) {
+                resultImg.src = "https://via.placeholder.com/400x500/ffb6c1/ffffff?text=Feminine+You";
+            } else {
+                resultImg.src = "https://via.placeholder.com/400x500/add8e6/ffffff?text=Slight+Changes";
+            }
+            
+            resultImg.style.display = "block";
+        }
+
+        // Go to next day or end game
+        function nextDay() {
+            gameState.day++;
+            transformationResult.classList.add('hidden');
+            
+            if (gameState.day > gameState.maxDays || gameState.stats.femininity >= 100 || gameState.stats.bimbo >= 100) {
+                showEnding();
+            } else {
+                pillSelection.classList.remove('hidden');
+                setupPillChoices();
+            }
+        }
+
+        // Show ending scene
+        function showEnding() {
+            pillSelection.classList.add('hidden');
+            endingScene.classList.remove('hidden');
+            
+            let ending = "";
+            if (gameState.stats.femininity >= 100 && gameState.stats.bimbo >= 100) {
+                ending = "The transformation is complete! You've become the perfect bimbo - beautiful, sexy, and blissfully carefree. Your old life as a college student seems like a distant memory as you embrace your new identity.";
+                endingImg.src = "https://via.placeholder.com/400x500/ff69b4/ffffff?text=Perfect+Bimbo";
+            } else if (gameState.stats.femininity >= 100) {
+                ending = "You've achieved complete feminization! While you retained some of your intelligence, your body is now undeniably female. You feel at peace with your new feminine identity.";
+                endingImg.src = "https://via.placeholder.com/400x500/ffb6c1/ffffff?text=Feminized+You";
+            } else if (gameState.stats.bimbo >= 100) {
+                ending = "The bimbo transformation is total! You can barely remember complex thoughts anymore, but you don't care - you're too busy enjoying how sexy you look and feel. Being a brainless bimbo feels so right!";
+                endingImg.src = "https://via.placeholder.com/400x500/ff69b4/ffffff?text=Total+Bimbo";
+            } else {
+                ending = "The pills have run out! While you didn't complete the full transformation, you've definitely changed. Part of you wonders what would have happened if you'd taken more...";
+                endingImg.src = "https://via.placeholder.com/400x500/dda0dd/ffffff?text=Partial+Transformation";
+            }
+            
+            endingText.textContent = ending;
+            endingImg.style.display = "block";
+        }
+
+        // Update stat displays
+        function updateStatDisplays() {
+            masculinityDisplay.textContent = `${Math.round(gameState.stats.masculinity)}%`;
+            femininityDisplay.textContent = `${Math.round(gameState.stats.femininity)}%`;
+            intelligenceDisplay.textContent = `${Math.round(gameState.stats.intelligence)}%`;
+            bimboDisplay.textContent = `${Math.round(gameState.stats.bimbo)}%`;
+        }
+
+        // Restart game
+        function restartGame() {
+            initGame();
+        }
+
+        // Start the game
+        initGame();
+    </script>
+</body>
+</html>
